@@ -9,8 +9,8 @@ __author__ = 'meamka'
 
 RESOURCES_PATH = Foundation.NSBundle.mainBundle().resourcePath()
 
-Images = collections.namedtuple('Images', ['app', 'offline'])
-Images.app = os.path.join(RESOURCES_PATH, 'online.png')
+Images = collections.namedtuple('Images', ['online', 'offline'])
+Images.online = os.path.join(RESOURCES_PATH, 'online.png')
 Images.offline = os.path.join(RESOURCES_PATH, 'offline.png')
 
 # General

@@ -8,6 +8,7 @@ import requests
 import rumps
 
 import consts
+import defaults
 import tw_auth
 
 # DEBUG purposes
@@ -18,17 +19,22 @@ class App(rumps.App):
     def __init__(self):
         super(App, self).__init__('Whale', quit_button=None)
         self.menu = ['Channels', rumps.separator, "Preferences", rumps.separator, 'Quit']
-        self.icon = os.path.join(consts.RESOURCES_PATH, 'online.png')
+        self.icon = consts.Images.online
 
         self.channels = []
 
         # OS X Cocoa user preferences
         self.user_defaults = Foundation.NSUserDefaults.standardUserDefaults()
+        self.register_user_defaults()
 
         self.session = None
         self.watch_timer = None
 
         self.authenticate()
+
+    def register_user_defaults(self):
+        self.user_defaults.registerDefaults_(defaults.USER_DEFAULTS)
+        self.user_defaults.synchronize()
 
     def authenticate(self):
         """Begin Twitch.tv authentication process.
@@ -177,4 +183,4 @@ class App(rumps.App):
                     )
 
             print '%s is active? %s' % (channel_name, True if stream else False)
-            self.menu['Channels'][channel_name].set_icon(consts.Images.app if stream else consts.Images.offline)
+            self.menu['Channels'][channel_name].set_icon(consts.Images.online if stream else consts.Images.offline)
