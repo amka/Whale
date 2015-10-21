@@ -19,7 +19,9 @@ DATA_FILES = [
 OPTIONS = {
     'argv_emulation': True,
     'iconfile': 'Resources/AppIcon.icns',
-    'plist': 'src/Info.plist',
+    'plist': 'Resources/Info.plist',
+    'semi_standalone': True,
+    'site_packages': True
 }
 
 setup(

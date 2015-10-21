@@ -1,9 +1,9 @@
 #!/bin/sh
 # 
-# Creates ./dist/HelloAppStore.app
+# Creates ./dist/Whale.app
 # 
 
-APP_PATH=dist/HelloAppStore.app
+APP_PATH=dist/Whale.app
 
 mkdir -p dist build
 
@@ -17,7 +17,7 @@ if [[ $PYTHON_VERSION != Python\ 2.7* ]]; then
     exit 1
 fi
 
-# Build dist/HelloAppStore.app
+# Build dist/Whale.app
 python setup.py py2app
 
 # Limit Universal Binaries to only contain the architechures {i386, x86_64},
@@ -47,7 +47,7 @@ if [ ${DO_CODE_SIGNING} -eq 1 ] ; then
         "$APP_PATH/Contents/Frameworks/Python.framework/Versions/2.7"
     codesign -s "$SIGNING_IDENTITY_APP" -f \
         --entitlements src/app.entitlements \
-        "$APP_PATH/Contents/MacOS/HelloAppStore"
+        "$APP_PATH/Contents/MacOS/Whale"
     codesign -s "$SIGNING_IDENTITY_APP" -f \
         --entitlements src/app.entitlements \
         "$APP_PATH/Contents/MacOS/python"
