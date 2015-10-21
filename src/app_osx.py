@@ -7,23 +7,24 @@ import Foundation
 import requests
 import rumps
 
+import consts
 import tw_auth
-from config import Config, RESOURCES_PATH, APP_IMAGE, OFFLINE_IMAGE
 
 # DEBUG purposes
-rumps.rumps._NOTIFICATIONS = False
+# rumps.rumps._NOTIFICATIONS = False
 
 
 class App(rumps.App):
     def __init__(self):
         super(App, self).__init__('Whale', quit_button=None)
         self.menu = ['Channels', rumps.separator, "Preferences", rumps.separator, 'Quit']
-        self.icon = os.path.join(RESOURCES_PATH, 'app.png')
+        self.icon = os.path.join(consts.RESOURCES_PATH, 'app.png')
 
         self.channels = []
 
-        self.config = Config()
-        self.config.load()
+        # OS X Cocoa user preferences
+        self.user_defaults = Foundation.NSUserDefaults.standardUserDefaults()
+
         self.session = None
         self.watch_timer = None
 
@@ -35,12 +36,13 @@ class App(rumps.App):
 
         :return:
         """
-        if not hasattr(self.config, 'twitch_access_token') or not self.config.twitch_access_token:
+        access_token = self.user_defaults.stringForKey_(consts.TWITCH_ACCESS_TOKEN)
+        if not access_token:
             ts = tw_auth.TokenHandler()
             auth_thread = threading.Thread(target=ts.get_access_token, args=(self.auth_callback, ))
             auth_thread.start()
         else:
-            self.auth_callback(access_token=self.config.twitch_access_token, error=None)
+            self.auth_callback(access_token=access_token, error=None)
 
     def auth_callback(self, access_token, error):
         """Callback function called after Twitch OAuth Authentication.
@@ -56,9 +58,9 @@ class App(rumps.App):
             rumps.notification('Whale', 'Error', 'Twitch.tv authentication failed')
             return
 
-        self.config.twitch_access_token = access_token
-        self.config.save()
-        print self.config.twitch_access_token
+        self.user_defaults.setValue_forKey_(access_token, consts.TWITCH_ACCESS_TOKEN)
+        self.user_defaults.synchronize()
+        print self.user_defaults.stringForKey_(consts.TWITCH_ACCESS_TOKEN)
         self.init_twitch_session()
 
         user_dict = self.load_user_info()
@@ -69,7 +71,8 @@ class App(rumps.App):
             self.session = requests.session()
 
         self.session.headers.update({'Client-ID': tw_auth.TWITCH_CLIENT_ID})
-        self.session.headers.update({'Authorization': 'OAuth ' + self.config.twitch_access_token})
+        self.session.headers.update({'Authorization': 'OAuth ' +
+                                                      self.user_defaults.stringForKey_(consts.TWITCH_ACCESS_TOKEN)})
 
     def load_user_info(self):
         response = self.session.get('https://api.twitch.tv/kraken/user')
@@ -100,7 +103,7 @@ class App(rumps.App):
                 menu_item = rumps.MenuItem(
                     title=channel['display_name'],
                     key=channel['name'],
-                    icon=OFFLINE_IMAGE,
+                    icon=consts.Images.offline,
                     callback=self.channel_action
                 )
 
@@ -115,9 +118,8 @@ class App(rumps.App):
 
     @rumps.clicked("Preferences")
     def prefs(self, sender):
-        print os.path.dirname(self.config.config_file)
-        url = self.config.config_file
-        Foundation.NSWorkspace.sharedWorkspace().openFile_(url)
+        # Foundation.NSWorkspace.sharedWorkspace().openFile_(url)
+        rumps.notification(consts.WHALE_TITLE, '', 'Preferences are not implemented at the moment')
 
     @rumps.clicked('Quit')
     def quit(self, sender):
@@ -139,10 +141,7 @@ class App(rumps.App):
     def begin_watch(self):
         print 'Begin begin_watch'
 
-        try:
-            check_interval = float(self.config.whale_check_interval)
-        except (TypeError, ValueError):
-            check_interval = 900  # set default value to 15 minutes
+        check_interval = self.user_defaults.floatForKey_(consts.CHECK_INTERVAL) or 900  # set value to 15 minutes
 
         print 'Begin watching channels every ', check_interval,  ' sec'
 
@@ -166,4 +165,4 @@ class App(rumps.App):
             stream = stream_json.get('stream')
 
             print '%s is active? %s' % (channel_name, True if stream else False)
-            self.menu['Channels'][channel_name].set_icon(APP_IMAGE if stream else OFFLINE_IMAGE)
+            self.menu['Channels'][channel_name].set_icon(consts.Images.app if stream else consts.Images.offline)
