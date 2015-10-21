@@ -75,7 +75,7 @@ class App(rumps.App):
                                                       self.user_defaults.stringForKey_(consts.TWITCH_ACCESS_TOKEN)})
 
     def load_user_info(self):
-        response = self.session.get('https://api.twitch.tv/kraken/user')
+        response = self.session.get('https://api.twitch.tv/kraken/user', verify=False)
         if response.status_code == 200:
             try:
                 return response.json()
@@ -89,7 +89,7 @@ class App(rumps.App):
         :return:
         """
         print 'Begin load user follows'
-        response = self.session.get('https://api.twitch.tv/kraken/users/%s/follows/channels' % user_name)
+        response = self.session.get('https://api.twitch.tv/kraken/users/%s/follows/channels' % user_name, verify=False)
         if response.status_code == 200:
             try:
                 response_json = response.json()
@@ -159,7 +159,7 @@ class App(rumps.App):
         channel_url = 'https://api.twitch.tv/kraken/streams/{channel_name}'.format(channel_name=channel_name)
         print 'check stream at ', channel_url
 
-        response = self.session.get(channel_url)
+        response = self.session.get(channel_url, verify=False)
         if response.status_code == 200:
             stream_json = response.json()
             stream = stream_json.get('stream')
