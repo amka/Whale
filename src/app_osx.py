@@ -18,7 +18,7 @@ class App(rumps.App):
     def __init__(self):
         super(App, self).__init__('Whale', quit_button=None)
         self.menu = ['Channels', rumps.separator, "Preferences", rumps.separator, 'Quit']
-        self.icon = os.path.join(consts.RESOURCES_PATH, 'app.png')
+        self.icon = os.path.join(consts.RESOURCES_PATH, 'online.png')
 
         self.channels = []
 
@@ -60,7 +60,9 @@ class App(rumps.App):
 
         self.user_defaults.setValue_forKey_(access_token, consts.TWITCH_ACCESS_TOKEN)
         self.user_defaults.synchronize()
-        print self.user_defaults.stringForKey_(consts.TWITCH_ACCESS_TOKEN)
+
+        print 'Token successfullly updated'
+
         self.init_twitch_session()
 
         user_dict = self.load_user_info()
@@ -163,6 +165,16 @@ class App(rumps.App):
         if response.status_code == 200:
             stream_json = response.json()
             stream = stream_json.get('stream')
+
+            # Check prev state icon and new stream state. If it changes to online that user should be notified
+            if self.user_defaults.boolForKey_(consts.ALLOW_USER_NOTIFICATION) \
+                and self.menu['Channels'][channel_name].icon == consts.Images.offline \
+                and stream:
+                    rumps.notification(
+                        consts.WHALE_TITLE,
+                        'Channel online!',
+                        '%s is online now' % self.menu['Channels'][channel_name].title
+                    )
 
             print '%s is active? %s' % (channel_name, True if stream else False)
             self.menu['Channels'][channel_name].set_icon(consts.Images.app if stream else consts.Images.offline)

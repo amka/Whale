@@ -12,13 +12,13 @@ APP = ['src/Whale.py']
 # Extra items to add to dist/HelloAppStore.app/Contents/Resources
 DATA_FILES = [
     'Resources/whale.ini',
-    'Resources/app.png',
+    'Resources/online.png',
     'Resources/offline.png',
 ]
 
 OPTIONS = {
     'argv_emulation': True,
-    'iconfile': 'src/Icon.icns',
+    'iconfile': 'Resources/AppIcon.icns',
     'plist': 'src/Info.plist',
 }
 
@@ -26,5 +26,5 @@ setup(
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
-    setup_requires=['py2app', 'requests'],
+    setup_requires=['py2app', 'requests']
 )
